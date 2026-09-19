@@ -255,4 +255,6 @@ Career Foundation 已就绪；后续业务能力应按 Spec-Driven Development �
 
 ## 许可证
 
-当前尚未指定许可证。在提交、分发或复用代码前，请先确认项目维护者选择的许可证。
+RoleOS is licensed under the Apache License 2.0.
+
+See the [LICENSE](LICENSE) file for details.
