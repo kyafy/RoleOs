@@ -1,0 +1,11 @@
+.git/
+.mvn/repository/
+**/target/
+*.log
+.env*
+!/.env.example
+docs/
+specs/
+secrets/
+resumes/
+artifacts/

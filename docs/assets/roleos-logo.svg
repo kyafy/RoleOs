@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">RoleOS 标志</title>
+  <desc id="desc">以字母 R 为核心的原创极简品牌徽记</desc>
+  <defs>
+    <linearGradient id="bg" x1="58" y1="42" x2="454" y2="470" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#12365C"/>
+      <stop offset="1" stop-color="#071C33"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="132" y1="108" x2="382" y2="404" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8AF1DE"/>
+      <stop offset="1" stop-color="#32CBB0"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#041326" flood-opacity=".32"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <path d="M113 119H399" stroke="#224B70" stroke-width="2" opacity=".72"/>
+  <path d="M113 393H399" stroke="#224B70" stroke-width="2" opacity=".42"/>
+
+  <g filter="url(#glow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M153 390V122" stroke="url(#mint)" stroke-width="32"/>
+    <path d="M153 122H265C329 122 369 159 369 218C369 277 329 314 265 314H153" stroke="#F1FFFC" stroke-width="32"/>
+    <path d="M261 314L375 390" stroke="#F1FFFC" stroke-width="32"/>
+  </g>
+
+  <circle cx="153" cy="122" r="8" fill="#D8FFF7"/>
+  <circle cx="369" cy="218" r="8" fill="#6EE4CF"/>
+  <path d="M272 185H316" stroke="#6EE4CF" stroke-width="8" stroke-linecap="round" opacity=".95"/>
+</svg>

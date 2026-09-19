@@ -123,6 +123,18 @@ Codex = Coding Agent
 Career DB = Structured Facts
 ```
 
+调用层再细分为：
+
+```text
+AgentRuntimePort → OryxOS → 模型 Provider / OpenAI API
+CodingAgentPort  → Codex  → 代码执行环境 / 模型调用
+OpenAPI          → RoleOS 对外 REST 接口文档
+```
+
+即使 OryxOS 与 Codex 最终都使用同一模型提供商，也必须保留两个 Port 和独立的审计、
+成本及权限边界。不得为了减少 Adapter 数量，把 Codex 工程执行能力放入对话 Agent，
+或把 OryxOS Agent 作为项目代码修改器。
+
 Codex 不应在编码时自行改成：
 
 ```text
@@ -788,6 +800,23 @@ Demo：
 US-1 的关键不是 UI，而是：
 
 > **Durable Workflow + Domain Boundary 成立。**
+
+### 当前实现状态（2026-09-18）
+
+Career Foundation 已按上述边界交付：职业档案与资产、技能多来源及可信度视图、PostgreSQL/Flyway
+持久化 Workflow、等待审批后的重启恢复、重复 `commandId` 幂等决定，以及统一的认证、错误、Trace ID
+与脱敏响应契约。
+
+导入能力当前仅是受控的 Fake Adapter / `fixture://` 测试入口：候选项必须由用户确认、编辑或拒绝，只有
+确认后的内容才会写入 Career Asset；它不是生产简历解析器，也不能把原始简历或未经确认候选项变成用户事实。
+
+验证入口见 [`specs/001-career-foundation/quickstart.md`](../specs/001-career-foundation/quickstart.md)。核心命令为：
+
+```bash
+mvn -B -ntp -pl roleos-web -am test -Dtest=CrossCuttingApiContractTest -Dsurefire.failIfNoSpecifiedTests=false
+mvn -B -ntp -pl roleos-boot -am test -Dtest=CareerFoundationGoldenScenarioIT -Dsurefire.failIfNoSpecifiedTests=false
+mvn -B -ntp -Pquality verify
+```
 
 ---
 

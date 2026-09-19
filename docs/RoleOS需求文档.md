@@ -178,6 +178,12 @@ Career Memory    → 管用户长期信息
 Evidence         → 管真实性
 ```
 
+补充调用边界：RoleOS Agent 的对话、JD 理解和经历判断由 OryxOS 承载的 Agent Runtime
+完成；真实项目的代码改造由独立的 Codex 执行链路完成。二者可使用同一模型提供商，但不能
+共享业务职责：Agent 不得直接改代码，Codex 不得决定 Workflow 状态或把推理写成 Career Fact。
+`OpenAPI` 指 RoleOS 对外接口文档，`OpenAI API` 指模型调用接口，两者必须在产品和实现中
+明确区分。
+
 ---
 
 ## 3. 设计目标与产品原则

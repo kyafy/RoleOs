@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: roleos
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${ROLEOS_DATABASE_URL:jdbc:postgresql://localhost:5432/roleos}
+    username: ${ROLEOS_DATABASE_USERNAME:roleos_app}
+    password: ${ROLEOS_DATABASE_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  mvc:
+    problemdetails:
+      enabled: false
+
+server:
+  port: ${ROLEOS_SERVER_PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+
+springdoc:
+  api-docs:
+    enabled: ${ROLEOS_OPENAPI_ENABLED:false}
+  swagger-ui:
+    enabled: ${ROLEOS_OPENAPI_ENABLED:false}
+
+logging:
+  level:
+    root: INFO
+    io.roleos: INFO

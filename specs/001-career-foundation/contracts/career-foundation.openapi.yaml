@@ -1,0 +1,114 @@
+openapi: 3.0.3
+info:
+  title: RoleOS Career Foundation API
+  version: 0.1.0
+  description: 职业事实、候选审阅、技能来源和工作流审批的首期契约。
+servers:
+  - url: /api/v1
+paths:
+  /career-profile:
+    get:
+      summary: 获取当前认证用户的职业档案
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+    put:
+      summary: 更新当前认证用户的职业档案
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+  /resume-imports:
+    post:
+      summary: 创建受控来源的简历导入批次
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [commandId], properties: { commandId: { type: string, format: uuid } } } } } }
+      responses:
+        '202': { $ref: '#/components/responses/CommandAccepted' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+  /import-candidates/{candidateId}/decisions:
+    post:
+      summary: 确认、编辑或拒绝一个候选职业事实
+      parameters:
+        - $ref: '#/components/parameters/CandidateId'
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CommandRequest' } } } }
+      responses:
+        '200': { $ref: '#/components/responses/CommandAccepted' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /skills:
+    get:
+      summary: 查询当前认证用户的技能及其来源
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+    post:
+      summary: 维护当前认证用户的技能或来源
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CommandRequest' } } } }
+      responses:
+        '200': { $ref: '#/components/responses/CommandAccepted' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+  /workflows:
+    get:
+      summary: 查询当前认证用户的工作流
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+    post:
+      summary: 创建工作流
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CommandRequest' } } } }
+      responses:
+        '202': { $ref: '#/components/responses/CommandAccepted' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+  /approvals/{approvalId}/decisions:
+    post:
+      summary: 对等待审批的工作流作出决定
+      parameters:
+        - $ref: '#/components/parameters/ApprovalId'
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CommandRequest' } } } }
+      responses:
+        '200': { $ref: '#/components/responses/CommandAccepted' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '409': { $ref: '#/components/responses/Conflict' }
+components:
+  parameters:
+    CandidateId: { name: candidateId, in: path, required: true, schema: { type: string, format: uuid } }
+    ApprovalId: { name: approvalId, in: path, required: true, schema: { type: string, format: uuid } }
+  schemas:
+    CommandRequest:
+      type: object
+      required: [commandId]
+      properties:
+        commandId: { type: string, format: uuid, description: 同一用户写命令的幂等键 }
+    CommandMetadata:
+      type: object
+      required: [commandId]
+      properties:
+        commandId: { type: string, format: uuid }
+    ApiResponse:
+      type: object
+      required: [data, traceId]
+      properties:
+        data: {}
+        traceId: { type: string }
+        command: { $ref: '#/components/schemas/CommandMetadata' }
+    ApiError:
+      type: object
+      required: [code, message, traceId, timestamp]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        traceId: { type: string }
+        timestamp: { type: string, format: date-time }
+  responses:
+    Success: { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/ApiResponse' } } } }
+    CommandAccepted: { description: 命令已接受或返回幂等结果, content: { application/json: { schema: { $ref: '#/components/schemas/ApiResponse' } } } }
+    ValidationError: { description: 请求校验失败, content: { application/json: { schema: { $ref: '#/components/schemas/ApiError' } } } }
+    AuthenticationRequired: { description: 未认证, content: { application/json: { schema: { $ref: '#/components/schemas/ApiError' } } } }
+    AccessDenied: { description: 无资源归属权限, content: { application/json: { schema: { $ref: '#/components/schemas/ApiError' } } } }
+    Conflict: { description: 幂等或状态冲突, content: { application/json: { schema: { $ref: '#/components/schemas/ApiError' } } } }

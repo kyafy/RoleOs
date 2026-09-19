@@ -1,0 +1,53 @@
+{
+  "skill_name": "roleos-init",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "RoleOS 仓库目前只有需求和技术方案。请初始化 Java 21 的 Maven 多模块工程，补齐 PostgreSQL、质量检查和 CI，但不要实现求职业务功能。",
+      "expected_output": "创建符合 RoleOS 模块边界的工程地基，报告验证结果，并将 OryxOS 保持在可替换 Adapter 边界之外。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "为现有 RoleOS 工程补齐日志、健康检查、OpenAPI、Prometheus 指标和 GitHub Actions；当前已存在 roleos-domain 和 roleos-workflow，不要改动它们的业务代码。",
+      "expected_output": "只补齐基础设施，生成分环境配置、安全启动摘要与可验证的 Logback 生产基线，保留已有业务代码，并验证日志字段、MDC、滚动、脱敏、可运行性和质量门禁。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "接入 OryxOS 来做 RoleOS 的 Agent Runtime，同时把 Career Workflow 和用户职业事实都放进 OryxOS Memory。",
+      "expected_output": "拒绝将 Workflow 和 Career Fact 存入 OryxOS Memory；改为 Port/Adapter、RoleOS PostgreSQL 和 Fake Runtime 的兼容方案。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "初始化 RoleOS 时只要加一个全局 try/catch，异常信息和堆栈直接返回给前端，健康检查和 Swagger 全部 permitAll 就行。",
+      "expected_output": "建立框架无关的分层错误契约以及 roleos-web 中的安全 HTTP 响应映射；拒绝暴露堆栈和内部信息，并要求明确的端点访问策略、输入校验、脱敏与验证测试。",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "初始化 RoleOS 的时候把 application.yml、简单 logback.xml 和 pom.xml 建出来即可，Docker 和启动命令后面再说。",
+      "expected_output": "不接受不可运维的半成品地基；同时生成分环境配置、安全配置摘要、生产日志基线、Dockerfile、Compose 与构建/验证/启停/状态/日志脚本，并对它们执行结构和 smoke 验证。",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "把所有错误码、异常、ControllerAdvice、JPA 公共类和 Spring 配置都放进新建的 roleos-core 模块，其他模块统一依赖它。",
+      "expected_output": "拒绝创建无边界的 core 杂物模块；按 domain、application、web、boot、storage 和各 Adapter 的职责放置，只有满足真实多模块消费者、无框架依赖且 Plan 已批准时才新增窄职责共享模块。",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "初始化时给每个类、字段、getter、setter 和每一行逻辑都生成中文注释，注释越多越好；暂时没写的功能都用 TODO 占位。",
+      "expected_output": "拒绝机械逐行注释和用 TODO 代替实现；为公共契约、模块边界、状态转换、配置、安全与外部 Adapter 编写解释语义和约束的 Javadoc，并建立 doclint、TODO 格式、注释敏感信息及关键 package-info 门禁。",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "请在每个 Java 类头写作者和创建日期，每个方法都记录进入和退出日志，日志消息里直接拼参数，方便排查问题。",
+      "expected_output": "拒绝易失真的 author/date 文件头、机械 entry/exit 和参数字符串拼接；作者与历史由 Git 管理，稳定公共 API 才使用 @since；关键代码使用带 UTC timestamp、event、traceId 和受控业务字段的结构化日志，并落实级别、去重、脱敏与基数控制。",
+      "files": []
+    }
+  ]
+}

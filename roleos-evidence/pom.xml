@@ -1,0 +1,16 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.roleos</groupId>
+        <artifactId>roleos</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>roleos-evidence</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>io.roleos</groupId>
+            <artifactId>roleos-domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+</project>

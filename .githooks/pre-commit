@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# CI 会强制执行密钥扫描；本地安装 gitleaks 后同样在提交前扫描暂存内容。
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "[RoleOS] 未检测到 gitleaks，跳过本地密钥扫描；CI 会执行强制扫描。"
+  echo "[RoleOS] 安装提示：https://github.com/gitleaks/gitleaks"
+  exit 0
+fi
+
+echo "[RoleOS] 正在执行 gitleaks 暂存区扫描…"
+gitleaks git --staged --redact --no-banner

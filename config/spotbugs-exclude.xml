@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <!-- Spring injects these Port collaborators; they are intentionally retained by application services. -->
+  <Match>
+    <Class name="io.roleos.application.career.importing.ResumeImportApplicationService" />
+    <Method name="&lt;init&gt;" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="io.roleos.application.career.profile.CareerAssetApplicationService" />
+    <Method name="&lt;init&gt;" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="io.roleos.application.career.skill.SkillProvenanceApplicationService" />
+    <Method name="&lt;init&gt;" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <!-- JdbcTemplate is a Spring-managed infrastructure collaborator, not returned from these adapters. -->
+  <Match>
+    <Class name="~io\.roleos\.storage\.career\.Jdbc.*" />
+    <Method name="&lt;init&gt;" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <!-- MVC controllers retain Spring-injected application services without returning them. -->
+  <Match>
+    <Class name="io.roleos.web.api.career.CareerAssetController" />
+    <Method name="&lt;init&gt;" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="io.roleos.web.api.skill.SkillController" />
+    <Method name="&lt;init&gt;" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+</FindBugsFilter>

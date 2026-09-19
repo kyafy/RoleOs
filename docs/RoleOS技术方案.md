@@ -400,6 +400,43 @@ Domain Service 校验 JSON Schema 后才能写入 Career DB。
 
 ---
 
+## 3.5 OpenAI 模型调用与 Codex 执行边界
+
+需要明确区分 **OpenAPI** 与 **OpenAI API**：
+
+- OpenAPI 是 RoleOS 对外 REST API 的契约与文档，归 `roleos-web` 管理；
+- OpenAI API 是模型推理服务接口，可能被 OryxOS Runtime 或 Codex 使用；
+- 二者名称相近，但不属于同一集成层，不能互相替代。
+
+RoleOS 的模型调用分为两条职责不同的链路：
+
+```text
+职业理解 / 对话 / 判断
+RoleOS Application
+→ AgentRuntimePort
+→ OryxRuntimeAdapter
+→ OryxOS Runtime
+→ OpenAI Responses API 或其他模型 Provider
+
+真实项目工程升级
+RoleOS Upgrade Workflow
+→ CodingAgentPort
+→ CodexAdapter
+→ Codex CLI / Codex Agent Service
+→ 模型推理 + 文件系统 / Shell / MCP 工具
+```
+
+两条链路底层可以使用同一模型提供商，甚至同一个 Responses API，但不能合并为同一个
+业务 Adapter：前者输出经 Schema 校验的职业判断，后者在独立 Git Worktree 中执行受控的
+工程任务。OryxOS 不得直接改造项目代码；Codex 不得决定 Career Workflow 状态或写入
+Career Fact。
+
+OpenAI 凭据、模型配置、调用成本和 Trace 应按 `Agent Runtime` 与 `Coding Agent` 两类
+调用分别记录和限额；生产环境优先使用独立的配置或密钥作用域。任何模型调用都不得默认将
+Career Fact 写入 Agent Memory，且必须遵守数据保留与敏感信息策略。
+
+---
+
 # 4. Career Workflow Engine
 
 ## 4.1 为什么不直接用 ReAct 跑完整流程
@@ -1021,6 +1058,11 @@ CodexAdapter
 ```
 
 未来可替换其他 Coding Agent。
+
+`CodexAdapter` 可以通过本地 Codex CLI 或受控的 Codex Agent 服务执行任务。即使其底层
+使用与 OryxOS 相同的模型提供商或 OpenAI Responses API，也必须保持为独立的
+`CodingAgentPort`：它拥有 Git Worktree、Shell、测试与评测等工程执行权限，而不是普通
+对话或职业判断能力。
 
 ---
 

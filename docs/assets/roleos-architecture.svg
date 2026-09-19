@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1100" viewBox="0 0 1600 1100" role="img" aria-labelledby="title desc">
+  <title id="title">RoleOS V1 技术架构图</title>
+  <desc id="desc">模块化单体、职业领域、Agent Runtime、执行端口和数据层之间的关系</desc>
+  <defs>
+    <linearGradient id="page" x1="0" y1="0" x2="1600" y2="1100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7FBFC"/>
+      <stop offset="1" stop-color="#EEF5F8"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#14314A" flood-opacity=".10"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#5D7890"/>
+    </marker>
+    <style>
+      .title{font:700 34px -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;fill:#102D4F}
+      .subtitle{font:400 16px -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;fill:#5D7084}
+      .layer{font:700 16px -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;letter-spacing:1px;fill:#3B607C}
+      .group{font:700 19px -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;fill:#163A59}
+      .cardTitle{font:700 17px -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;fill:#183B58}
+      .cardText{font:400 13px -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;fill:#5A7083}
+      .small{font:500 12px -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;fill:#628099}
+      .line{fill:none;stroke:#6C8497;stroke-width:2;marker-end:url(#arrow)}
+      .dash{fill:none;stroke:#79A091;stroke-width:2;stroke-dasharray:6 6;marker-end:url(#arrow)}
+    </style>
+  </defs>
+
+  <rect width="1600" height="1100" fill="url(#page)"/>
+  <rect x="44" y="34" width="10" height="54" rx="5" fill="#35C8AD"/>
+  <text x="76" y="62" class="title">RoleOS V1 技术架构</text>
+  <text x="76" y="88" class="subtitle">模块化单体 · Workflow Outside, Agent Inside · Evidence-first</text>
+  <text x="1488" y="70" text-anchor="end" class="small">规划架构 · 2026</text>
+
+  <!-- User interface -->
+  <text x="76" y="143" class="layer">交互层</text>
+  <g filter="url(#cardShadow)">
+    <rect x="76" y="162" width="1448" height="76" rx="18" fill="#FFFFFF" stroke="#D6E3E9"/>
+  </g>
+  <circle cx="116" cy="200" r="15" fill="#DDF8F1"/><path d="M110 201h12M116 195v12" stroke="#159F88" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="148" y="197" class="cardTitle">Web / API / CLI</text>
+  <text x="148" y="218" class="cardText">创建与恢复 Career Workflow · 展示任务进度 · 接收人工确认</text>
+
+  <!-- Application -->
+  <text x="76" y="286" class="layer">应用层</text>
+  <g filter="url(#cardShadow)">
+    <rect x="76" y="304" width="1448" height="150" rx="22" fill="#EAF4FA" stroke="#BFD8E8"/>
+  </g>
+  <text x="105" y="338" class="group">RoleOS Application</text>
+  <g filter="url(#cardShadow)">
+    <rect x="106" y="360" width="310" height="68" rx="14" fill="#FFF"/>
+    <rect x="465" y="360" width="310" height="68" rx="14" fill="#FFF"/>
+    <rect x="824" y="360" width="310" height="68" rx="14" fill="#FFF"/>
+    <rect x="1183" y="360" width="310" height="68" rx="14" fill="#FFF"/>
+  </g>
+  <text x="132" y="388" class="cardTitle">Career Supervisor</text><text x="132" y="410" class="cardText">命令编排与任务恢复</text>
+  <text x="491" y="388" class="cardTitle">Career Workflow Engine</text><text x="491" y="410" class="cardText">持久化状态、转换与幂等</text>
+  <text x="850" y="388" class="cardTitle">Human Approval Service</text><text x="850" y="410" class="cardText">关键操作人工控制</text>
+  <text x="1209" y="388" class="cardTitle">Trace / Audit</text><text x="1209" y="410" class="cardText">可解释性与审计记录</text>
+
+  <!-- Domain -->
+  <text x="76" y="503" class="layer">职业领域层</text>
+  <g filter="url(#cardShadow)">
+    <rect x="76" y="521" width="935" height="344" rx="22" fill="#FFFFFF" stroke="#D5E3E9"/>
+  </g>
+  <text x="106" y="557" class="group">Career Domain</text>
+  <text x="106" y="582" class="small">领域规则与结构化职业事实；不直接依赖浏览器、Coding Agent 或 OryxOS 实现</text>
+  <g filter="url(#cardShadow)">
+    <rect x="106" y="610" width="262" height="92" rx="14" fill="#F4F9FC"/>
+    <rect x="397" y="610" width="262" height="92" rx="14" fill="#F4F9FC"/>
+    <rect x="688" y="610" width="293" height="92" rx="14" fill="#F4F9FC"/>
+    <rect x="106" y="731" width="262" height="92" rx="14" fill="#F4F9FC"/>
+    <rect x="397" y="731" width="262" height="92" rx="14" fill="#F4F9FC"/>
+    <rect x="688" y="731" width="293" height="92" rx="14" fill="#F4F9FC"/>
+  </g>
+  <text x="128" y="644" class="cardTitle">Job Intelligence</text><text x="128" y="669" class="cardText">发现 · 标准化 · 筛选 · 排序</text>
+  <text x="419" y="644" class="cardTitle">JD &amp; Experience Match</text><text x="419" y="669" class="cardText">Requirement · Match · Gap</text>
+  <text x="710" y="644" class="cardTitle">Experience Builder</text><text x="710" y="669" class="cardText">经历深挖 · Story · Upgrade Plan</text>
+  <text x="128" y="765" class="cardTitle">Project Upgrade</text><text x="128" y="790" class="cardText">验证驱动的能力建设</text>
+  <text x="419" y="765" class="cardTitle">Claim-Evidence</text><text x="419" y="790" class="cardText">Provenance · 验证策略</text>
+  <text x="710" y="765" class="cardTitle">Resume &amp; Application</text><text x="710" y="790" class="cardText">简历 · 面试故事 · 结果反馈</text>
+
+  <!-- Runtime -->
+  <g filter="url(#cardShadow)">
+    <rect x="1043" y="521" width="481" height="344" rx="22" fill="#EAF8F5" stroke="#B8E4DA"/>
+  </g>
+  <text x="1073" y="557" class="group">Agent Runtime</text>
+  <text x="1073" y="582" class="small">借 Runtime，不借业务</text>
+  <rect x="1073" y="610" width="421" height="166" rx="16" fill="#FFF" stroke="#C8E8DF"/>
+  <text x="1101" y="649" class="cardTitle">OryxOS Adapter</text>
+  <text x="1101" y="678" class="cardText">ReAct / Plan-Execute · Tool Registry · MCP</text>
+  <text x="1101" y="705" class="cardText">LLM Provider · Memory · Knowledge · Sandbox</text>
+  <rect x="1073" y="797" width="421" height="42" rx="12" fill="#DDF6EF"/>
+  <text x="1101" y="823" class="cardText">Agent 只返回结构化 Decision / Recommendation</text>
+
+  <!-- Ports -->
+  <text x="76" y="914" class="layer">执行端口与基础设施</text>
+  <g filter="url(#cardShadow)">
+    <rect x="76" y="932" width="1448" height="122" rx="22" fill="#102D4F"/>
+  </g>
+  <text x="106" y="966" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-size="19" font-weight="700" fill="#E8F5FA">Ports / Adapters / Data</text>
+  <g>
+    <rect x="355" y="952" width="230" height="76" rx="13" fill="#1A4268"/>
+    <rect x="612" y="952" width="230" height="76" rx="13" fill="#1A4268"/>
+    <rect x="869" y="952" width="230" height="76" rx="13" fill="#1A4268"/>
+    <rect x="1126" y="952" width="368" height="76" rx="13" fill="#1A4268"/>
+  </g>
+  <text x="378" y="981" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="700" fill="#DDF8F1">BrowserProvider</text>
+  <text x="378" y="1005" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#B9D3E3">Playwright MCP / Kimi</text>
+  <text x="635" y="981" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="700" fill="#DDF8F1">CodingAgentPort</text>
+  <text x="635" y="1005" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#B9D3E3">Codex Adapter / Worktree</text>
+  <text x="892" y="981" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="700" fill="#DDF8F1">LLM / Agent Port</text>
+  <text x="892" y="1005" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#B9D3E3">OryxOS Runtime</text>
+  <text x="1149" y="981" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="700" fill="#DDF8F1">Career PostgreSQL · Evidence · Trace</text>
+  <text x="1149" y="1005" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="#B9D3E3">结构化事实 · Workflow State · Audit Artifacts</text>
+
+  <!-- relationships -->
+  <path d="M800 238V304" class="line"/>
+  <path d="M800 454V521" class="line"/>
+  <path d="M1011 690H1043" class="dash"/>
+  <path d="M520 865V932" class="line"/>
+  <path d="M828 865V932" class="line"/>
+  <path d="M1265 865V932" class="dash"/>
+  <text x="1048" y="682" class="small">语义判断</text>
+</svg>

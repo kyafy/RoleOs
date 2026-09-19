@@ -1,0 +1,4 @@
+interface:
+  display_name: "RoleOS SDD 自动推进"
+  short_description: "从需求自动推进到可验证交付"
+  default_prompt: "继续当前 RoleOS Feature 的 SDD 工作流，从首个未完成任务开始执行；仅在软门禁时向我提问。"
