@@ -2,6 +2,7 @@ package io.roleos.web.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.roleos.web.error.ApiErrorResponse;
 import io.roleos.web.error.ErrorCode;
 import io.roleos.web.trace.TraceIdFilter;
@@ -16,11 +17,8 @@ import org.springframework.stereotype.Component;
 @Component
 public final class SecurityErrorWriter {
 
-  private final ObjectWriter jsonWriter;
-
-  public SecurityErrorWriter(ObjectMapper objectMapper) {
-    this.jsonWriter = objectMapper.writer();
-  }
+  private static final ObjectWriter JSON_WRITER =
+      new ObjectMapper().registerModule(new JavaTimeModule()).writer();
 
   public void write(
       HttpServletRequest request,
@@ -31,7 +29,7 @@ public final class SecurityErrorWriter {
       throws IOException {
     response.setStatus(status);
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    jsonWriter.writeValue(
+    JSON_WRITER.writeValue(
         response.getOutputStream(),
         ApiErrorResponse.of(
             errorCode,

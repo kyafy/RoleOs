@@ -1,0 +1,5 @@
+roleos:
+  # 仅 `local` Profile 使用；这两个值必须通过环境变量提供，且不可提交到仓库。
+  local-auth:
+    user-id: ${ROLEOS_LOCAL_USER_ID}
+    password: ${ROLEOS_LOCAL_PASSWORD}

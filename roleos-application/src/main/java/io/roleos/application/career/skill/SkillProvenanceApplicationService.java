@@ -13,6 +13,8 @@ import io.roleos.domain.career.skill.SkillSourceType;
 import java.time.Clock;
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /** Explicit skill-source and capability maintenance; no level or score is inferred here. */
@@ -20,6 +22,11 @@ import org.springframework.stereotype.Service;
 @SuppressWarnings(
     "EI_EXPOSE_REP2") // Spring-managed Port/Repository collaborators are retained by design.
 public final class SkillProvenanceApplicationService {
+  private static final String LOG_COMMAND_ID = "commandId";
+  private static final String LOG_EVENT = "event";
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(SkillProvenanceApplicationService.class);
+
   private final io.roleos.domain.career.CareerAssetRepository assets;
   private final SkillProvenanceRepository repository;
   private final IdempotencyRecordPort idempotency;
@@ -54,11 +61,18 @@ public final class SkillProvenanceApplicationService {
             .findSkill(userId, command.skillId())
             .orElseThrow(() -> new IllegalArgumentException("技能不存在或不属于当前用户"));
     var old = idempotency.findBy(userId, command.commandId());
-    if (old.isPresent())
+    if (old.isPresent()) {
+      LOGGER
+          .atInfo()
+          .addKeyValue(LOG_EVENT, "career.skill_source.idempotency_hit")
+          .addKeyValue("skillId", skill.id())
+          .addKeyValue(LOG_COMMAND_ID, command.commandId().value())
+          .log("技能来源写入命令已幂等命中");
       return repository.findSources(userId, skill.id()).stream()
           .filter(s -> s.id().toString().equals(old.orElseThrow().resultReference()))
           .findFirst()
           .orElseThrow();
+    }
     SkillSource source =
         new SkillSource(
             UUID.randomUUID(),
@@ -70,12 +84,25 @@ public final class SkillProvenanceApplicationService {
     idempotency.saveIfAbsent(
         new IdempotencyRecord(
             userId, command.commandId(), source.id().toString(), clock.instant()));
+    LOGGER
+        .atInfo()
+        .addKeyValue(LOG_EVENT, "career.skill_source.added")
+        .addKeyValue("skillId", skill.id())
+        .addKeyValue("sourceId", source.id())
+        .addKeyValue("sourceType", command.type())
+        .addKeyValue(LOG_COMMAND_ID, command.commandId().value())
+        .log("技能来源已保存");
     return source;
   }
 
   public CapabilityView saveCapability(UserId userId, SaveCapabilityCommand command) {
     var previous = idempotency.findBy(userId, command.commandId());
     if (previous.isPresent()) {
+      LOGGER
+          .atInfo()
+          .addKeyValue(LOG_EVENT, "career.capability.idempotency_hit")
+          .addKeyValue(LOG_COMMAND_ID, command.commandId().value())
+          .log("能力写入命令已幂等命中");
       Capability capability =
           repository
               .findCapability(userId, UUID.fromString(previous.orElseThrow().resultReference()))
@@ -97,6 +124,15 @@ public final class SkillProvenanceApplicationService {
     idempotency.saveIfAbsent(
         new IdempotencyRecord(
             userId, command.commandId(), capability.id().toString(), clock.instant()));
+    LOGGER
+        .atInfo()
+        .addKeyValue(LOG_EVENT, "career.capability.saved")
+        .addKeyValue("capabilityId", capability.id())
+        .addKeyValue(LOG_COMMAND_ID, command.commandId().value())
+        .addKeyValue("skillCount", links.skillIds().size())
+        .addKeyValue("experienceCount", links.experienceIds().size())
+        .addKeyValue("projectCount", links.projectIds().size())
+        .log("能力及其关联已保存");
     return new CapabilityView(capability, links);
   }
 

@@ -1,6 +1,7 @@
 # 构建产物与 IDE 文件
 target/
 .mvn/repository/
+.dependency-check/
 **/target/
 *.class
 *.jar

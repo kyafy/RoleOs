@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RoleOS Job Pool</title>
+  <meta name="csrf-token" th:content="${_csrf.token}"><meta name="csrf-header" th:content="${_csrf.headerName}">
+  <script type="module" src="/jobs/assets/search.mjs"></script>
+</head>
+<body>
+<main>
+  <h1>Job Pool</h1>
+  <section aria-labelledby="search-title">
+    <h2 id="search-title">发现岗位</h2>
+    <form id="job-search-form">
+      <label>关键词 <input name="keyword" required maxlength="50"></label>
+      <label>城市 <input name="city" required maxlength="50"></label>
+      <label>目标岗位 <input name="targetRole" required maxlength="100"></label>
+      <label>最低月薪 <input name="salaryMin" type="number" min="0"></label>
+      <label>工作年限 <input name="experienceYears" type="number" min="0" max="60"></label>
+      <label>浏览方式 <select name="provider"><option value="AUTO">自动选择</option><option value="PLAYWRIGHT_MCP">Playwright</option><option value="KIMI_WEBBRIDGE">Kimi</option></select></label>
+      <button id="search-submit" type="submit">开始低频搜索</button>
+    </form>
+    <p id="search-status" role="status" aria-live="polite">等待发起搜索</p>
+    <button id="search-refresh" type="button" hidden>刷新搜索状态</button>
+    <button id="search-resume" type="button" hidden>恢复搜索</button>
+    <noscript>搜索交互需要启用 JavaScript；已有岗位仍可浏览。</noscript>
+  </section>
+  <form method="get" action="/jobs" aria-label="岗位筛选">
+    <label>策略 <select name="strategy"><option value="">全部</option><option>BROAD_APPLY</option><option>TARGETED_APPLY</option><option>SKIPPED</option></select></label>
+    <label>过滤 <select name="filter"><option value="">全部</option><option>PASS</option><option>UNKNOWN</option><option>REJECT</option></select></label>
+    <button type="submit">筛选</button>
+  </form>
+  <a href="/jobs">刷新岗位池</a>
+  <p th:if="${#lists.isEmpty(jobs)}">暂无岗位。请先发起低频岗位搜索。</p>
+  <article th:each="entry : ${jobs}">
+    <h2><a th:href="@{/jobs/{id}(id=${entry.job.id})}" th:text="${entry.job.title}">岗位</a></h2>
+    <p><span th:text="${entry.job.company}">公司</span> · <span th:text="${entry.job.city ?: '城市未知'}">城市</span></p>
+    <p>过滤：<strong th:text="${entry.candidate.filterResult}">UNKNOWN</strong>；策略：<strong th:text="${entry.candidate.strategy}">BROAD_APPLY</strong></p>
+    <p>排序分：<span th:text="${entry.candidate.rankingScore ?: '未评分'}"></span>；分析状态：<span th:text="${entry.candidate.semanticAnalysisStatus ?: '未知'}"></span></p>
+    <p>建议：<span th:text="${entry.candidate.strategyRecommendation ?: '待分析'}"></span></p>
+    <ul th:if="${entry.rankingEvaluation != null}"><li th:each="reason : ${entry.rankingEvaluation.reasons}" th:text="${reason}"></li></ul>
+    <p>来源：<span th:text="${entry.job.source ?: '未知'}"></span>；来源状态：<span th:text="${entry.job.sourceStatus ?: '未知'}"></span></p>
+    <p>招聘方活跃度：<span th:text="${entry.job.recruiterActivity ?: 'UNKNOWN'}"></span>；发布时间：<span th:text="${entry.job.publishTime ?: '未知'}"></span></p>
+    <p>最近抓取：<span th:text="${entry.job.lastSeenAt ?: '未知'}"></span></p>
+    <a rel="noopener noreferrer" target="_blank" th:href="${entry.job.sourceUrl}">打开来源岗位</a>
+  </article>
+</main>
+</body>
+</html>

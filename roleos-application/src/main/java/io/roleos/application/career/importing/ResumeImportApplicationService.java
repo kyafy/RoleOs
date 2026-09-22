@@ -30,6 +30,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,11 @@ import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings(
     "EI_EXPOSE_REP2") // Spring-managed Port/Repository collaborators are retained by design.
 public class ResumeImportApplicationService {
+  private static final String LOG_COMMAND_ID = "commandId";
+  private static final String LOG_EVENT = "event";
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(ResumeImportApplicationService.class);
+
   private final ResumeImportPort importer;
   private final ResumeImportRepository imports;
   private final CareerAssetRepository assets;
@@ -64,6 +71,11 @@ public class ResumeImportApplicationService {
   public CreateResult create(UserId userId, CreateCommand command) {
     var previous = idempotency.findBy(userId, command.commandId());
     if (previous.isPresent()) {
+      LOGGER
+          .atInfo()
+          .addKeyValue(LOG_EVENT, "career.resume_import.idempotency_hit")
+          .addKeyValue(LOG_COMMAND_ID, command.commandId().value())
+          .log("简历导入命令已幂等命中");
       return new CreateResult(
           imports
               .findImport(userId, UUID.fromString(previous.orElseThrow().resultReference()))
@@ -85,6 +97,14 @@ public class ResumeImportApplicationService {
     idempotency.saveIfAbsent(
         new IdempotencyRecord(
             userId, command.commandId(), resumeImport.id().toString(), clock.instant()));
+    LOGGER
+        .atInfo()
+        .addKeyValue(LOG_EVENT, "career.resume_import.created")
+        .addKeyValue("importId", resumeImport.id())
+        .addKeyValue(LOG_COMMAND_ID, command.commandId().value())
+        .addKeyValue("candidateCount", extraction.candidates().size())
+        .addKeyValue("failureCount", extraction.failures().size())
+        .log("简历导入候选项已创建，仍需人工确认");
     return new CreateResult(resumeImport, extraction.failures());
   }
 
@@ -96,6 +116,12 @@ public class ResumeImportApplicationService {
             .orElseThrow(() -> new IllegalArgumentException("候选项不存在或不属于当前用户"));
     var previous = idempotency.findBy(userId, command.commandId());
     if (previous.isPresent()) {
+      LOGGER
+          .atInfo()
+          .addKeyValue(LOG_EVENT, "career.resume_candidate.idempotency_hit")
+          .addKeyValue("candidateId", candidateId)
+          .addKeyValue(LOG_COMMAND_ID, command.commandId().value())
+          .log("简历候选项决定已幂等命中");
       return DecisionResult.from(
           imports
               .findCandidate(userId, UUID.fromString(previous.orElseThrow().resultReference()))
@@ -123,6 +149,14 @@ public class ResumeImportApplicationService {
         new IdempotencyRecord(
             userId, command.commandId(), candidateId.toString(), clock.instant()));
     candidate.decide(decision);
+    LOGGER
+        .atInfo()
+        .addKeyValue(LOG_EVENT, "career.resume_candidate.decided")
+        .addKeyValue("candidateId", candidateId)
+        .addKeyValue(LOG_COMMAND_ID, command.commandId().value())
+        .addKeyValue("decision", command.type())
+        .addKeyValue("status", candidate.status())
+        .log("简历候选项人工决定已持久化");
     return DecisionResult.from(candidate);
   }
 

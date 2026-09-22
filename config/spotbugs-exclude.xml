@@ -16,11 +16,22 @@
     <Method name="&lt;init&gt;" />
     <Bug pattern="EI_EXPOSE_REP2" />
   </Match>
-  <!-- JdbcTemplate is a Spring-managed infrastructure collaborator, not returned from these adapters. -->
+  <!-- Storage adapters retain Spring-managed JDBC/serialization collaborators and never expose them. -->
   <Match>
-    <Class name="~io\.roleos\.storage\.career\.Jdbc.*" />
+    <Class name="~io\.roleos\.storage\.career\..*" />
     <Method name="&lt;init&gt;" />
     <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <Match>
+    <Class name="~io\.roleos\.storage\.job\..*" />
+    <Method name="&lt;init&gt;" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+  </Match>
+  <!-- 唯一索引并发竞争时，编排器只在未找到已创建搜索时原样传播持久化异常。 -->
+  <Match>
+    <Class name="io.roleos.job.service.JobSearchOrchestrator" />
+    <Method name="start" />
+    <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
   </Match>
   <!-- MVC controllers retain Spring-injected application services without returning them. -->
   <Match>

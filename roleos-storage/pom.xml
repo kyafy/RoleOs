@@ -7,6 +7,12 @@
     </parent>
     <artifactId>roleos-storage</artifactId>
     <dependencies>
+
+        <dependency>
+            <groupId>io.roleos</groupId>
+            <artifactId>roleos-job</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.roleos</groupId>
             <artifactId>roleos-domain</artifactId>
@@ -28,6 +34,10 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

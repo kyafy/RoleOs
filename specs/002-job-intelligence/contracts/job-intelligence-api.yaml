@@ -1,0 +1,274 @@
+openapi: 3.1.0
+info:
+  title: RoleOS Job Intelligence API
+  version: 1.0.0
+  description: Feature 002 的岗位搜索、候选池、详情与用户策略决策契约。
+servers:
+  - url: /api
+security:
+  - bearerAuth: []
+paths:
+  /job-searches:
+    post:
+      operationId: startJobSearch
+      summary: 发起一次低频、可恢复的岗位搜索
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StartJobSearchRequest' }
+      responses:
+        '202':
+          description: 已接受搜索
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobSearchResponse' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /job-searches/{searchId}:
+    get:
+      operationId: getJobSearch
+      summary: 查看搜索状态和恢复信息
+      parameters:
+        - $ref: '#/components/parameters/SearchId'
+      responses:
+        '200':
+          description: 搜索状态
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobSearchResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /job-searches/{searchId}/resume:
+    post:
+      operationId: resumeJobSearch
+      summary: 用户处理人工验证后恢复搜索
+      parameters:
+        - $ref: '#/components/parameters/SearchId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '202':
+          description: 已接受恢复
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobSearchResponse' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /jobs:
+    get:
+      operationId: listJobCandidates
+      summary: 分页查询当前用户 Job Pool
+      parameters:
+        - name: strategy
+          in: query
+          schema: { $ref: '#/components/schemas/JobStrategy' }
+        - name: filterResult
+          in: query
+          schema: { $ref: '#/components/schemas/FilterResult' }
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        '200':
+          description: 候选池分页
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobCandidatePage' }
+  /jobs/{jobId}:
+    get:
+      operationId: getJobCandidateDetail
+      summary: 查看岗位事实、过滤、排序和策略详情
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: 岗位详情
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobCandidateDetail' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /jobs/{jobId}/decisions:
+    post:
+      operationId: decideJobStrategy
+      summary: Promote、Keep Broad 或 Skip
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/JobDecisionRequest' }
+      responses:
+        '200':
+          description: 当前有效策略
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobDecisionResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 8, maxLength: 128 }
+    SearchId:
+      name: searchId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    NotFound:
+      description: 当前用户无此资源
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    Conflict:
+      description: 状态或幂等键冲突
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+  schemas:
+    StartJobSearchRequest:
+      type: object
+      additionalProperties: false
+      required: [keywords, city, provider]
+      properties:
+        keywords:
+          type: array
+          minItems: 1
+          maxItems: 5
+          items: { type: string, minLength: 1, maxLength: 50 }
+        city: { type: string, minLength: 1, maxLength: 50 }
+        salaryMin: { type: integer, minimum: 0 }
+        experienceYears: { type: integer, minimum: 0, maximum: 60 }
+        targetRole: { type: string, minLength: 1, maxLength: 100 }
+        provider:
+          type: string
+          enum: [AUTO, PLAYWRIGHT_MCP, KIMI_WEBBRIDGE]
+    JobSearchResponse:
+      type: object
+      required: [id, state, step, requestedProvider, counts, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        state:
+          type: string
+          enum: [CREATED, RUNNING, PAUSED_FOR_HUMAN, RETRYABLE_FAILED, FAILED, COMPLETED]
+        step:
+          type: string
+          enum: [NAVIGATE_SEARCH, LIST_SNAPSHOT, DETAIL_FETCH, NORMALIZE, FILTER, RANK, PERSIST]
+        requestedProvider:
+          type: string
+          enum: [AUTO, PLAYWRIGHT_MCP, KIMI_WEBBRIDGE]
+        activeProvider:
+          type: [string, 'null']
+          enum: [PLAYWRIGHT_MCP, KIMI_WEBBRIDGE, FAKE, null]
+        waitReason: { type: [string, 'null'] }
+        failureCode: { type: [string, 'null'] }
+        counts:
+          type: object
+          additionalProperties: false
+          required: [discovered, normalized, rejected, ranked]
+          properties:
+            discovered: { type: integer, minimum: 0 }
+            normalized: { type: integer, minimum: 0 }
+            rejected: { type: integer, minimum: 0 }
+            ranked: { type: integer, minimum: 0 }
+        updatedAt: { type: string, format: date-time }
+    JobCandidatePage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/JobCandidateSummary' }
+        page: { type: integer, minimum: 0 }
+        size: { type: integer, minimum: 1 }
+        total: { type: integer, minimum: 0 }
+    JobCandidateSummary:
+      type: object
+      required: [jobId, title, company, source, filterResult, strategy, semanticAnalysisStatus]
+      properties:
+        jobId: { type: string, format: uuid }
+        title: { type: string }
+        company: { type: string }
+        city: { type: [string, 'null'] }
+        salaryDisplay: { type: [string, 'null'] }
+        rankingScore: { type: [number, 'null'], minimum: 0, maximum: 100 }
+        filterResult: { $ref: '#/components/schemas/FilterResult' }
+        strategy: { $ref: '#/components/schemas/JobStrategy' }
+        recommendation:
+          type: [string, 'null']
+          enum: [KEEP_BROAD, PROMOTE_TO_TARGETED, SKIP, REVIEW, null]
+        semanticAnalysisStatus:
+          type: string
+          enum: [PENDING, SUCCEEDED, FAILED]
+        source: { type: string, enum: [BOSS] }
+        sourceUrl: { type: string, format: uri }
+        recruiterActivity: { type: string, enum: [JUST_NOW, TODAY, RECENT, STALE, UNKNOWN] }
+        publishTime: { type: [string, 'null'], format: date-time }
+    JobCandidateDetail:
+      allOf:
+        - $ref: '#/components/schemas/JobCandidateSummary'
+        - type: object
+          required: [rawJd, normalizedJd, filterRules, reasons, importantSignals, warnings]
+          properties:
+            rawJd: { type: string }
+            normalizedJd: { type: string }
+            filterRules:
+              type: array
+              items: { $ref: '#/components/schemas/FilterRuleResult' }
+            reasons: { type: array, items: { type: string } }
+            importantSignals: { type: array, items: { type: string } }
+            warnings: { type: array, items: { type: string } }
+    FilterRuleResult:
+      type: object
+      required: [rule, result, reasonCode, explanation]
+      properties:
+        rule: { type: string, enum: [CITY, SALARY, EXPERIENCE, TARGET_ROLE] }
+        result: { $ref: '#/components/schemas/FilterResult' }
+        reasonCode: { type: string }
+        explanation: { type: string }
+    JobDecisionRequest:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision: { type: string, enum: [PROMOTE, KEEP_BROAD, SKIP] }
+        reason: { type: string, maxLength: 500 }
+    JobDecisionResponse:
+      type: object
+      required: [jobId, decision, previousStrategy, strategy, decidedAt]
+      properties:
+        jobId: { type: string, format: uuid }
+        decision: { type: string, enum: [PROMOTE, KEEP_BROAD, SKIP] }
+        previousStrategy: { $ref: '#/components/schemas/JobStrategy' }
+        strategy: { $ref: '#/components/schemas/JobStrategy' }
+        decidedAt: { type: string, format: date-time }
+    JobStrategy:
+      type: string
+      enum: [BROAD_APPLY, TARGETED_APPLY, SKIPPED]
+    FilterResult:
+      type: string
+      enum: [PASS, REJECT, UNKNOWN]
+    ApiError:
+      type: object
+      required: [code, message, traceId]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        traceId: { type: string }

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://roleos.local/schemas/job-semantic-ranking-v1.json",
+  "title": "Job Semantic Ranking Decision V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "technicalStackFit",
+    "roleRelevance",
+    "careerGoalFit",
+    "jobQuality",
+    "experienceLeverage",
+    "recommendation",
+    "reasons",
+    "importantSignals",
+    "warnings"
+  ],
+  "properties": {
+    "technicalStackFit": { "$ref": "#/$defs/signal" },
+    "roleRelevance": { "$ref": "#/$defs/signal" },
+    "careerGoalFit": { "$ref": "#/$defs/signal" },
+    "jobQuality": { "$ref": "#/$defs/signal" },
+    "experienceLeverage": { "$ref": "#/$defs/signal" },
+    "recommendation": {
+      "type": "string",
+      "enum": ["KEEP_BROAD", "PROMOTE_TO_TARGETED", "SKIP", "REVIEW"]
+    },
+    "reasons": { "$ref": "#/$defs/textList" },
+    "importantSignals": { "$ref": "#/$defs/textList" },
+    "warnings": { "$ref": "#/$defs/textList" }
+  },
+  "$defs": {
+    "signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "explanation"],
+      "properties": {
+        "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "explanation": { "type": "string", "minLength": 1, "maxLength": 500 }
+      }
+    },
+    "textList": {
+      "type": "array",
+      "maxItems": 10,
+      "items": { "type": "string", "minLength": 1, "maxLength": 300 }
+    }
+  }
+}

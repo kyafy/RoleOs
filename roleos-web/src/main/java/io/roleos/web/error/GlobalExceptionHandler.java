@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -28,6 +29,13 @@ public final class GlobalExceptionHandler {
       MethodArgumentNotValidException exception, HttpServletRequest request) {
     return ResponseEntity.badRequest()
         .body(ApiErrorResponse.of(ErrorCode.VALIDATION_ERROR, "请求参数校验失败", traceId(request)));
+  }
+
+  @ExceptionHandler(MissingRequestHeaderException.class)
+  public ResponseEntity<ApiErrorResponse> handleMissingHeaderException(
+      MissingRequestHeaderException exception, HttpServletRequest request) {
+    return ResponseEntity.badRequest()
+        .body(ApiErrorResponse.of(ErrorCode.VALIDATION_ERROR, "缺少必要请求头", traceId(request)));
   }
 
   @ExceptionHandler(Exception.class)

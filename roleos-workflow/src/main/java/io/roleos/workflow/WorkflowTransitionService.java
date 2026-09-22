@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public final class WorkflowTransitionService {
+  private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowTransitionService.class);
+
   private final Clock clock;
   private final Map<String, WorkflowTransitionResult> completedCommands = new HashMap<>();
 
@@ -66,7 +70,16 @@ public final class WorkflowTransitionService {
     if (reason == null || reason.isBlank()) {
       throw new IllegalArgumentException("reason must not be blank");
     }
-    return workflow.transitionTo(WorkflowStatus.PAUSED_FOR_HUMAN, reason, clock.instant());
+    WorkflowInstance paused =
+        workflow.transitionTo(WorkflowStatus.PAUSED_FOR_HUMAN, reason, clock.instant());
+    LOGGER
+        .atWarn()
+        .addKeyValue("event", "workflow.external_effect.uncertain")
+        .addKeyValue("workflowId", workflow.id())
+        .addKeyValue("fromStatus", workflow.status())
+        .addKeyValue("status", paused.status())
+        .log("外部副作用结果不确定，工作流已暂停等待人工处理");
+    return paused;
   }
 
   private static void requireCommandId(String commandId) {

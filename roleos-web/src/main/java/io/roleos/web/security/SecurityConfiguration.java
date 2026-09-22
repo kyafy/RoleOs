@@ -3,6 +3,7 @@ package io.roleos.web.security;
 import io.roleos.web.error.ErrorCode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,40 +15,46 @@ import org.springframework.security.web.SecurityFilterChain;
  * <p>仅健康检查可匿名访问；新增公开端点必须在评审中明确登记。
  */
 @Configuration
+@Profile("!local")
 public class SecurityConfiguration {
 
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityErrorWriter errorWriter)
-      throws Exception {
-    return http.authorizeHttpRequests(
-            authorization ->
-                authorization
-                    .requestMatchers("/actuator/health", "/actuator/health/**")
-                    .permitAll()
-                    .requestMatchers("/api/v1/**")
-                    .authenticated()
-                    .anyRequest()
-                    .denyAll())
-        .exceptionHandling(
-            exceptions ->
-                exceptions
-                    .authenticationEntryPoint(
-                        (request, response, exception) ->
-                            errorWriter.write(
-                                request,
-                                response,
-                                HttpStatus.UNAUTHORIZED.value(),
-                                ErrorCode.AUTHENTICATION_REQUIRED,
-                                "需要完成身份认证"))
-                    .accessDeniedHandler(
-                        (request, response, exception) ->
-                            errorWriter.write(
-                                request,
-                                response,
-                                HttpStatus.FORBIDDEN.value(),
-                                ErrorCode.ACCESS_DENIED,
-                                "当前身份无权访问该资源")))
-        .csrf(Customizer.withDefaults())
-        .build();
+  SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityErrorWriter errorWriter) {
+    try {
+      return http.authorizeHttpRequests(
+              authorization ->
+                  authorization
+                      .requestMatchers("/actuator/health", "/actuator/health/**")
+                      .permitAll()
+                      .requestMatchers("/api/**")
+                      .authenticated()
+                      .requestMatchers("/jobs", "/jobs/**")
+                      .authenticated()
+                      .anyRequest()
+                      .denyAll())
+          .exceptionHandling(
+              exceptions ->
+                  exceptions
+                      .authenticationEntryPoint(
+                          (request, response, exception) ->
+                              errorWriter.write(
+                                  request,
+                                  response,
+                                  HttpStatus.UNAUTHORIZED.value(),
+                                  ErrorCode.AUTHENTICATION_REQUIRED,
+                                  "需要完成身份认证"))
+                      .accessDeniedHandler(
+                          (request, response, exception) ->
+                              errorWriter.write(
+                                  request,
+                                  response,
+                                  HttpStatus.FORBIDDEN.value(),
+                                  ErrorCode.ACCESS_DENIED,
+                                  "当前身份无权访问该资源")))
+          .csrf(Customizer.withDefaults())
+          .build();
+    } catch (Exception exception) {
+      throw new IllegalStateException("无法初始化默认安全过滤器链", exception);
+    }
   }
 }

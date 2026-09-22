@@ -17,6 +17,12 @@ public class RoleOsException extends RuntimeException {
     this.statusValue = Objects.requireNonNull(status, "status 不能为空");
   }
 
+  public RoleOsException(ErrorCode errorCode, HttpStatus status, String message, Throwable cause) {
+    super(message, cause);
+    this.code = Objects.requireNonNull(errorCode, "errorCode 不能为空");
+    this.statusValue = Objects.requireNonNull(status, "status 不能为空");
+  }
+
   public ErrorCode errorCode() {
     return code;
   }

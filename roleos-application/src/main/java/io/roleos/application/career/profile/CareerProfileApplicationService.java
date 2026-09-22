@@ -12,11 +12,16 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /** 职业档案用例；用户归属由调用方传入的认证主体决定。 */
 @Service
 public final class CareerProfileApplicationService {
+
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(CareerProfileApplicationService.class);
 
   private final CareerProfileRepository profileRepository;
   private final IdempotencyRecordPort idempotencyRecordPort;
@@ -42,6 +47,11 @@ public final class CareerProfileApplicationService {
     Objects.requireNonNull(currentUser, "currentUser 不能为空");
     Objects.requireNonNull(command, "command 不能为空");
     if (idempotencyRecordPort.findBy(currentUser, command.commandId()).isPresent()) {
+      LOGGER
+          .atInfo()
+          .addKeyValue("event", "career.profile.idempotency_hit")
+          .addKeyValue("commandId", command.commandId().value())
+          .log("职业档案更新命令已幂等命中");
       return get(currentUser);
     }
 
@@ -54,6 +64,13 @@ public final class CareerProfileApplicationService {
                 .orElseGet(() -> create(currentUser, command, now)));
     idempotencyRecordPort.saveIfAbsent(
         new IdempotencyRecord(currentUser, command.commandId(), saved.id().toString(), now));
+    LOGGER
+        .atInfo()
+        .addKeyValue("event", "career.profile.upserted")
+        .addKeyValue("profileId", saved.id())
+        .addKeyValue("commandId", command.commandId().value())
+        .addKeyValue("outcome", saved.auditFields().version() == 0 ? "CREATED" : "UPDATED")
+        .log("职业档案已保存");
     return saved;
   }
 

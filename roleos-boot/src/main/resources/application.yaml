@@ -47,3 +47,35 @@ logging:
   level:
     root: INFO
     io.roleos: INFO
+
+roleos:
+  job:
+    # 单次搜索的候选上限；V1 只支持用户主动发起的低频搜索。
+    max-results-per-search: ${ROLEOS_JOB_MAX_RESULTS:50}
+    # 同一业务步骤的自动重试上限；人工验证不计入自动重试。
+    max-step-attempts: ${ROLEOS_JOB_MAX_STEP_ATTEMPTS:2}
+    # 外部 Job Source 单次调用超时，ISO-8601 Duration。
+    source-timeout: ${ROLEOS_JOB_SOURCE_TIMEOUT:PT30S}
+    ranking:
+      # 权重由确定性代码校验；招聘方活跃度对总分的绝对贡献不得超过 5 分。
+      rule-weight: ${ROLEOS_JOB_RULE_WEIGHT:0.45}
+      semantic-weight: ${ROLEOS_JOB_SEMANTIC_WEIGHT:0.55}
+      recruiter-activity-max-points: ${ROLEOS_JOB_RECRUITER_ACTIVITY_MAX_POINTS:5}
+      targeted-threshold: ${ROLEOS_JOB_TARGETED_THRESHOLD:80}
+  browser:
+    primary-provider: ${ROLEOS_BROWSER_PRIMARY_PROVIDER:PLAYWRIGHT_MCP}
+    fallback-provider: ${ROLEOS_BROWSER_FALLBACK_PROVIDER:KIMI_WEBBRIDGE}
+    # 启动摘要只记录 Provider 模式和启用状态，不输出命令参数、URL 查询或凭据。
+    startup-summary-enabled: ${ROLEOS_BROWSER_STARTUP_SUMMARY_ENABLED:true}
+    playwright:
+      enabled: ${ROLEOS_PLAYWRIGHT_MCP_ENABLED:false}
+      transport: ${ROLEOS_PLAYWRIGHT_MCP_TRANSPORT:STDIO}
+      command: ${ROLEOS_PLAYWRIGHT_MCP_COMMAND:npx}
+      arguments: ${ROLEOS_PLAYWRIGHT_MCP_ARGUMENTS:@playwright/mcp@latest}
+      endpoint: ${ROLEOS_PLAYWRIGHT_MCP_ENDPOINT:http://127.0.0.1:8931/mcp}
+      request-timeout: ${ROLEOS_PLAYWRIGHT_MCP_TIMEOUT:PT30S}
+    kimi:
+      enabled: ${ROLEOS_KIMI_WEBBRIDGE_ENABLED:false}
+      # 本地 Agent 命令必须由受控部署配置提供；不得由 Agent 文本或 HTTP 请求覆盖。
+      command: ${ROLEOS_KIMI_WEBBRIDGE_COMMAND:}
+      request-timeout: ${ROLEOS_KIMI_WEBBRIDGE_TIMEOUT:PT60S}

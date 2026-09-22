@@ -6,14 +6,16 @@ import org.springframework.stereotype.Component;
 
 /** 在首次写入职业资产前建立最小用户归属记录。 */
 @Component
-final class CareerUserJdbcSupport {
+@SuppressWarnings("EI_EXPOSE_REP2") // Spring-managed JDBC collaborator is retained by design.
+public final class CareerUserJdbcSupport {
   private final JdbcTemplate jdbcTemplate;
 
-  CareerUserJdbcSupport(JdbcTemplate jdbcTemplate) {
+  @SuppressWarnings("EI_EXPOSE_REP2") // Spring-managed JDBC collaborator is retained by design.
+  public CareerUserJdbcSupport(JdbcTemplate jdbcTemplate) {
     this.jdbcTemplate = jdbcTemplate;
   }
 
-  void ensure(UserId userId) {
+  public void ensure(UserId userId) {
     jdbcTemplate.update(
         "INSERT INTO career_user(id) VALUES (?) ON CONFLICT (id) DO NOTHING", userId.value());
   }
